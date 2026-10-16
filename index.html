@@ -4,39 +4,52 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Aphelion</title>
-<meta name="description" content="Aphelion. Coming soon.">
+<meta name="description" content="Aphelion is your trusted penetration testing partner. We test infrastructure, Active Directory, applications, cloud and people, and report every finding with evidence and clear remediation.">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="theme-color" content="#050507">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #050507;
     --fg: #f4f4f5;
     --muted: #9a9aa2;
+    --dim: #5f5f67;
+    --line: rgba(255,255,255,0.09);
+    --line-strong: rgba(255,255,255,0.22);
+    --panel: rgba(13,13,18,0.86);
+    --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; }
+  html { scroll-behavior: smooth; background: var(--bg); }
   body {
-    background: radial-gradient(ellipse at 50% 120%, #101018 0%, var(--bg) 60%);
+    background: var(--bg);
     color: var(--fg);
     font-family: "Outfit", "Segoe UI", system-ui, -apple-system, sans-serif;
-    overflow: hidden;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
   }
+  ::selection { background: rgba(255,255,255,0.85); color: #050507; }
+  /* the sky gradient lives on the fixed canvas, so scrolling never repaints the page background */
   #stars {
     position: fixed;
     inset: 0;
     width: 100%;
     height: 100%;
     z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse at 50% 0%, #101018 0%, var(--bg) 60%);
   }
-  main {
+
+  /* ================= hero ================= */
+  .hero {
     position: relative;
     z-index: 1;
-    min-height: 100%;
+    min-height: 100vh;
+    min-height: 100svh;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -82,15 +95,18 @@
     font-weight: 500;
   }
   .soon .line {
-    width: 56px;
+    width: 90px;
     height: 1px;
     margin: 10px auto 0;
     background: linear-gradient(90deg, transparent, #fff, transparent);
-    opacity: 0.6;
     animation: pulse 3.6s ease-in-out infinite;
   }
   .contact {
     margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     animation: rise 1.4s ease-out 0.7s both;
   }
   .contact a {
@@ -105,43 +121,644 @@
     color: var(--fg);
     border-bottom-color: rgba(255,255,255,0.5);
   }
-  footer {
-    position: fixed;
-    bottom: 18px;
-    left: 0;
-    right: 0;
+
+  /* copy-to-clipboard button beside each email address */
+  .copy {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    flex: none;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--dim);
+    cursor: pointer;
+    transition: color .2s, border-color .2s, background .2s;
+  }
+  .copy:hover, .copy:focus-visible {
+    color: var(--fg);
+    border-color: var(--line-strong);
+    background: rgba(255,255,255,0.04);
+    outline: none;
+  }
+  .copy svg {
+    grid-area: 1 / 1;
+    width: 15px;
+    height: 15px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: opacity .2s, transform .2s;
+  }
+  .copy .ok { opacity: 0; transform: scale(0.6); }
+  .copy.done { color: var(--fg); }
+  .copy.done .ic { opacity: 0; transform: scale(0.6); }
+  .copy.done .ok { opacity: 1; transform: none; }
+  .copy::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 8px);
+    transform: translate(-50%, 4px);
+    padding: 4px 9px;
+    border-radius: 6px;
+    background: var(--fg);
+    color: var(--bg);
+    font: 500 11px/1.4 "Outfit", system-ui, sans-serif;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s, transform .2s;
+  }
+  .copy:hover::after, .copy:focus-visible::after, .copy.done::after {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  /* ================= shared section bits ================= */
+  section {
+    position: relative;
     z-index: 1;
+    padding: clamp(80px, 14vh, 150px) 16px;
+  }
+  .wrap {
+    max-width: 1140px;
+    margin: 0 auto;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 22px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 28px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--fg));
+  }
+  h2 {
+    font-weight: 500;
+    font-size: clamp(32px, 5vw, 58px);
+    line-height: 1.06;
+    letter-spacing: -0.02em;
+    max-width: 16ch;
+  }
+  h2 .soft { color: var(--muted); }
+  .lede {
+    margin-top: 22px;
+    max-width: 56ch;
+    font-size: clamp(16px, 1.6vw, 19px);
+    font-weight: 300;
+    line-height: 1.65;
+    color: #c4c4ca;
+  }
+  .lede strong { color: var(--fg); font-weight: 500; }
+
+  .js .reveal {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0);
+    transition: opacity 1s cubic-bezier(.2,.7,.2,1), transform 1s cubic-bezier(.2,.7,.2,1);
+    transition-delay: var(--d, 0s);
+  }
+  .js .reveal.in { opacity: 1; transform: none; }
+
+  /* ================= mission ================= */
+  .mission .wrap {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: clamp(32px, 6vw, 80px);
+    align-items: center;
+  }
+  .pillars {
+    list-style: none;
+    margin-top: 36px;
+    display: grid;
+    gap: 14px;
+  }
+  .pillars li {
+    display: flex;
+    gap: 14px;
+    align-items: baseline;
+    color: #c4c4ca;
+    font-size: 15.5px;
+    font-weight: 300;
+    line-height: 1.5;
+  }
+  .pillars li::before {
+    content: "";
+    flex: none;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    border: 1px solid var(--fg);
+    box-shadow: 0 0 8px rgba(255,255,255,0.5);
+    transform: translateY(-1px);
+  }
+  .scan-wrap {
+    position: relative;
+    aspect-ratio: 1;
+    width: 100%;
+    max-width: 560px;
+    justify-self: center;
+  }
+  #scan { width: 100%; height: 100%; display: block; }
+  .scan-hud {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    color: var(--dim);
+    text-transform: uppercase;
+  }
+  .scan-hud span { position: absolute; }
+  .scan-hud .tl { top: 3%; left: 2%; }
+  .scan-hud .br { bottom: 3%; right: 2%; text-align: right; }
+  .scan-hud .tl::before, .scan-hud .br::after {
+    content: "";
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--line-strong);
+  }
+  .scan-hud .tl::before { left: -10px; top: -10px; border-right: 0; border-bottom: 0; }
+  .scan-hud .br::after { right: -10px; bottom: -10px; border-left: 0; border-top: 0; }
+  .blink { animation: blink 1.2s steps(2) infinite; }
+
+  /* ================= services ================= */
+  .services { padding-left: clamp(16px, 4vw, 64px); padding-right: clamp(16px, 4vw, 64px); }
+  .services .wrap { max-width: 1480px; }
+  .services .head { margin-bottom: clamp(40px, 6vw, 72px); }
+  .services .head .intro-copy { max-width: 68ch; margin-top: 22px; }
+  .services .head .lede { margin-top: 0; max-width: none; }
+  .services .head .lede + .lede { margin-top: 14px; }
+  /* five equal card columns: groups of three and two share a row so every card is the same width */
+  .groups {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: clamp(40px, 5vw, 64px) 14px;
+  }
+  .group { grid-column: span var(--span, 5); min-width: 0; }
+  .group-title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 18px;
+    padding-right: 18px;
+  }
+  .group-title::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--line-strong), transparent);
+  }
+  .planet {
+    position: relative;
+    flex: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 32% 30%, #fff, #8a8a93 45%, #1a1a22 100%);
+    box-shadow: 0 0 10px rgba(255,255,255,0.35);
+  }
+  .planet.ringed::after {
+    content: "";
+    position: absolute;
+    left: -6px; right: -6px;
+    top: 5px; height: 4px;
+    border: 1px solid rgba(255,255,255,0.55);
+    border-radius: 50%;
+    transform: rotate(-18deg);
+  }
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(var(--span, 5), minmax(0, 1fr));
+    gap: 14px;
+  }
+  .card {
+    position: relative;
+    padding: 24px 22px 22px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: linear-gradient(160deg, rgba(255,255,255,0.04), rgba(255,255,255,0) 60%), var(--panel);
+    overflow: hidden;
+    transition: border-color .35s, transform .35s;
+  }
+  .card::before {
+    /* spotlight that follows the pointer */
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(260px circle at var(--mx, 50%) var(--my, -40%), rgba(255,255,255,0.09), transparent 60%);
+    opacity: 0;
+    transition: opacity .35s;
+    pointer-events: none;
+  }
+  .card:hover { border-color: var(--line-strong); transform: translate3d(0, -3px, 0); }
+  .card:hover::before { opacity: 1; }
+  .card svg {
+    width: 30px;
+    height: 30px;
+    stroke: var(--fg);
+    fill: none;
+    stroke-width: 1.3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    margin-bottom: 18px;
+  }
+  .card h3 {
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    margin-bottom: 8px;
+  }
+  .card p {
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  /* ================= approach ================= */
+  .approach .wrap {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: clamp(32px, 6vw, 90px);
+    align-items: start;
+  }
+  .approach .intro { position: sticky; top: 18vh; }
+  .stages { list-style: none; }
+  .flight {
+    position: relative;
+    padding-left: 54px;
+  }
+  .flight::before, .flight .fill {
+    content: "";
+    position: absolute;
+    left: 16px;
+    top: 8px;
+    bottom: 8px;
+    width: 1px;
+  }
+  .flight::before {
+    background: repeating-linear-gradient(to bottom, var(--line-strong) 0 4px, transparent 4px 10px);
+  }
+  .flight .fill {
+    background: linear-gradient(to bottom, transparent, #fff);
+    transform-origin: top;
+    transform: scaleY(0);
+    will-change: transform;
+  }
+  .probe {
+    position: absolute;
+    left: 16px;
+    top: 8px;
+    width: 22px;
+    height: 22px;
+    margin: -11px 0 0 -11px;
+    pointer-events: none;
+    will-change: transform;
+  }
+  .probe::before {
+    content: "";
+    position: absolute;
+    inset: 7px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 14px 3px rgba(255,255,255,0.6);
+  }
+  .probe::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.45);
+    animation: ping 2s ease-out infinite;
+  }
+  .stage {
+    position: relative;
+    padding: 4px 0 clamp(36px, 5vw, 52px);
+  }
+  .stage:last-child { padding-bottom: 4px; }
+  .stage::before {
+    content: "";
+    position: absolute;
+    left: -43px;
+    top: 9px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    border: 1px solid var(--line-strong);
+    background: var(--bg);
+    transition: border-color .5s, background .5s, box-shadow .5s;
+  }
+  .stage.lit::before {
+    border-color: #fff;
+    background: #fff;
+    box-shadow: 0 0 10px rgba(255,255,255,0.7);
+  }
+  .stage .num {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: var(--dim);
+    transition: color .5s;
+  }
+  .stage.lit .num { color: var(--muted); }
+  .stage h3 {
+    font-size: clamp(20px, 2.2vw, 24px);
+    font-weight: 500;
+    margin: 6px 0 8px;
+    color: var(--muted);
+    transition: color .5s;
+  }
+  .stage.lit h3 { color: var(--fg); }
+  .stage p {
+    max-width: 50ch;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.6;
+    font-size: 15.5px;
+  }
+
+  /* ================= report ================= */
+  .report .wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(32px, 6vw, 90px);
+    align-items: center;
+  }
+  .ticks {
+    list-style: none;
+    margin-top: 32px;
+    display: grid;
+    gap: 16px;
+  }
+  .ticks li {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 12px;
+    color: #c4c4ca;
+    line-height: 1.55;
+    font-weight: 300;
+  }
+  .ticks svg {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    stroke: var(--fg);
+    fill: none;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .doc {
+    position: relative;
+    justify-self: center;
+    width: 100%;
+    max-width: 500px;
+    perspective: 1400px;
+  }
+  .doc::before {
+    /* soft light behind the page */
+    content: "";
+    position: absolute;
+    inset: 8% 0 -4%;
+    background: radial-gradient(ellipse at 50% 45%, rgba(255,255,255,0.13), transparent 65%);
+    pointer-events: none;
+  }
+  .doc a {
+    position: relative;
+    display: block;
+    aspect-ratio: 4 / 5;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 40px 90px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.15);
+    transform: rotateY(-9deg) rotateX(4deg);
+    transition: transform .8s cubic-bezier(.2,.7,.2,1), box-shadow .8s;
+  }
+  .doc a:hover, .doc a:focus-visible {
+    transform: none;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.3), 0 0 60px rgba(255,255,255,0.08);
+  }
+  .doc img {
+    display: block;
+    width: 100%;
+    height: auto;
+    will-change: transform;
+  }
+  .doc.in img { animation: pan 22s ease-in-out 1.2s infinite alternate; }
+  .doc a::after {
+    /* fade the bottom edge of the page into the frame */
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 18%;
+    background: linear-gradient(transparent, rgba(255,255,255,0.95));
+    pointer-events: none;
+  }
+  .doc .tag {
+    position: absolute;
+    left: 50%;
+    bottom: -38px;
+    transform: translateX(-50%);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--dim);
+    white-space: nowrap;
+  }
+
+  /* ================= launch / contact ================= */
+  .launch {
+    text-align: center;
+    padding-bottom: 0;
+    overflow: hidden;
+  }
+  .launch h2 { margin: 0 auto; max-width: 18ch; }
+  .launch .lede { margin: 22px auto 0; }
+  .btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 38px;
+    padding: 16px 30px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.5);
+    color: var(--bg);
+    background: var(--fg);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 16px;
+    letter-spacing: 0.04em;
+    box-shadow: 0 0 30px rgba(255,255,255,0.25);
+    transition: box-shadow .3s, transform .3s;
+  }
+  .btn:hover, .btn:focus-visible {
+    box-shadow: 0 0 50px rgba(255,255,255,0.45);
+    transform: translate3d(0, -2px, 0);
+  }
+  .btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: transform .3s; }
+  .btn:hover svg { transform: translate(3px, -3px); }
+  .mailrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 16px;
+  }
+  .mail {
+    color: var(--muted);
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    text-decoration: none;
+  }
+  .mail:hover { color: var(--fg); }
+  .world {
+    position: relative;
+    margin: clamp(60px, 10vw, 120px) auto 0;
+    width: min(1100px, 150vw);
+    left: 50%;
+    transform: translateX(-50%);
+    aspect-ratio: 2.6;
+    pointer-events: none;
+  }
+  .world .body {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 100%;
+    aspect-ratio: 1;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(255,255,255,0.10), transparent 28%),
+      repeating-radial-gradient(circle at 50% 50%, transparent 0 40px, rgba(255,255,255,0.018) 40px 41px),
+      radial-gradient(circle at 50% 30%, #121219, #07070a 55%);
+    box-shadow:
+      0 -1px 0 rgba(255,255,255,0.6),
+      0 -10px 40px rgba(255,255,255,0.14),
+      0 -60px 160px rgba(255,255,255,0.07);
+  }
+  .world .ring {
+    position: absolute;
+    left: 50%;
+    top: 16%;
+    width: 128%;
+    height: 34%;
+    transform: translateX(-50%) rotate(-6deg);
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-top-color: rgba(255,255,255,0.06);
+  }
+  /* the moon rides the ring on two composited oscillators, one per axis */
+  .world .mx, .world .my {
+    position: absolute;
+    inset: 0;
+    will-change: transform;
+  }
+  .world .mx { animation: osc-x 13s ease-in-out infinite alternate; }
+  .world .my { animation: osc-y 13s ease-in-out -6.5s infinite alternate; }
+  .world .moon {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    margin: -5px 0 0 -5px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff, #777 60%, #222);
+    box-shadow: 0 0 12px rgba(255,255,255,0.5);
+  }
+
+  footer {
+    position: relative;
+    z-index: 1;
+    margin-top: -60px;
+    padding: 0 16px 28px;
     text-align: center;
     font-size: 12px;
     letter-spacing: 0.12em;
-    color: #5f5f67;
+    color: var(--dim);
   }
+
   @keyframes rise {
-    from { opacity: 0; transform: translateY(12px); }
+    from { opacity: 0; transform: translate3d(0, 12px, 0); }
     to   { opacity: 1; transform: none; }
   }
   @keyframes pulse {
-    0%, 100% { opacity: 0.25; width: 40px; }
-    50%      { opacity: 0.8;  width: 90px; }
+    0%, 100% { opacity: 0.25; transform: scaleX(0.45); }
+    50%      { opacity: 0.8;  transform: scaleX(1); }
+  }
+  @keyframes ping {
+    from { transform: scale(0.5); opacity: 1; }
+    to   { transform: scale(2.2); opacity: 0; }
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+  /* frame is 4:5 and the page image is 1588x3128, so this shows the image from top to bottom */
+  @keyframes pan {
+    0%, 8%    { transform: translate3d(0, 0, 0); }
+    92%, 100% { transform: translate3d(0, -36.5%, 0); }
+  }
+  @keyframes osc-x { from { transform: translate3d(-50%, 0, 0); } to { transform: translate3d(50%, 0, 0); } }
+  @keyframes osc-y { from { transform: translate3d(0, -50%, 0); } to { transform: translate3d(0, 50%, 0); } }
+
+  @media (max-width: 1100px) {
+    .groups { grid-template-columns: 1fr; }
+    .group { grid-column: auto; }
+    .cards { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+  }
+  @media (max-width: 860px) {
+    .mission .wrap, .approach .wrap, .report .wrap { grid-template-columns: 1fr; }
+    .approach .intro { position: static; }
+    .scan-wrap { max-width: 440px; order: -1; }
+    .doc { max-width: 420px; margin-bottom: 30px; }
   }
   @media (max-width: 520px) {
     .orbit { width: 64vw; }
     .logo-svg { width: 86vw; }
+    .cards { grid-template-columns: 1fr; }
+    .flight { padding-left: 44px; }
+    .stage::before { left: -33px; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .orbit, .logo, .soon, .soon .line, .contact { animation: none; }
+    html { scroll-behavior: auto; }
+    .orbit, .logo, .soon, .soon .line, .contact,
+    .probe::after, .blink, .doc img, .world .mx, .world .my { animation: none; }
+    .js .reveal { opacity: 1; transform: none; transition: none; }
   }
 </style>
 </head>
 <body>
+<script>document.documentElement.className = 'js';</script>
 <canvas id="stars" aria-hidden="true"></canvas>
 
-<main>
+<main class="hero">
 <div class="content">
   <div class="logo">
-    <svg class="logo-svg" viewBox="0 0 1177 261" role="img" aria-label="Aphelion - cyber security" xmlns="http://www.w3.org/2000/svg">
+    <svg class="logo-svg" viewBox="0 0 1177 261" role="img" aria-label="Aphelion - penetration testing" xmlns="http://www.w3.org/2000/svg">
       <image href="logo.png" width="1177" height="261"/>
-      <text x="381" y="250" textLength="780" lengthAdjust="spacing" fill="#9a9aa2" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-weight="500" font-size="37">CYBER SECURITY</text>
+      <text x="381" y="250" textLength="780" lengthAdjust="spacing" fill="#9a9aa2" font-family="Outfit, Segoe UI, system-ui, sans-serif" font-weight="500" font-size="37">PENETRATION TESTING</text>
     </svg>
   </div>
 
@@ -150,13 +767,282 @@
     <div class="line"></div>
   </div>
 
-  <p class="contact"><a href="mailto:info@aphelionltd.co.uk">info@aphelionltd.co.uk</a></p>
+  <p class="contact">
+    <a href="mailto:info@aphelionltd.co.uk">info@aphelionltd.co.uk</a>
+    <button class="copy" type="button" data-copy="info@aphelionltd.co.uk" data-tip="Copy email" aria-label="Copy email address">
+      <svg class="ic" viewBox="0 0 16 16"><rect x="5.5" y="5.5" width="8" height="8" rx="1.6"/><path d="M10.5 5.5V3.6c0-.9-.7-1.6-1.6-1.6H3.6C2.7 2 2 2.7 2 3.6v5.3c0 .9.7 1.6 1.6 1.6h1.9"/></svg>
+      <svg class="ok" viewBox="0 0 16 16"><path d="m3 8.5 3.2 3.2L13 4.8"/></svg>
+    </button>
+  </p>
 
   <canvas id="orbit" class="orbit" aria-hidden="true"></canvas>
 </div>
 </main>
 
+<!-- ================= services ================= -->
+<section class="services" id="services">
+  <div class="wrap">
+    <div class="head">
+      <div>
+        <div class="eyebrow reveal">01 / Services</div>
+        <h2 class="reveal" style="--d:.08s">What we do.</h2>
+      </div>
+      <div class="intro-copy">
+        <p class="lede reveal" style="--d:.16s">Aphelion is <strong>your trusted penetration testing partner</strong>.
+        We provide independent security testing across your infrastructure, applications, cloud
+        platforms and people, identifying vulnerabilities so they can be remediated before they
+        are exploited.</p>
+        <p class="lede reveal" style="--d:.22s">Each engagement is scoped to your environment and
+        delivered by experienced consultants, from a single web application to a full internal
+        network and Active Directory assessment.</p>
+      </div>
+    </div>
+
+    <div class="groups">
+    <div class="group" style="--span:5">
+      <div class="group-title reveal"><span class="planet"></span>Infrastructure</div>
+      <div class="cards">
+        <article class="card reveal">
+          <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="12"/><ellipse cx="16" cy="16" rx="5" ry="12"/><path d="M4 16h24M6 9.5h20M6 22.5h20"/></svg>
+          <h3>External infrastructure</h3>
+          <p>Everything you expose to the Internet, tested from the Internet: hosts, services and the DMZ.</p>
+        </article>
+        <article class="card reveal" style="--d:.06s">
+          <svg viewBox="0 0 32 32"><rect x="6" y="5" width="20" height="7" rx="1.5"/><rect x="6" y="13" width="20" height="7" rx="1.5"/><rect x="6" y="21" width="20" height="7" rx="1.5"/><path d="M10 8.5h.01M10 16.5h.01M10 24.5h.01M15 8.5h7M15 16.5h7M15 24.5h7"/></svg>
+          <h3>Internal infrastructure</h3>
+          <p>An attacker already inside. Privilege escalation, Active Directory and lateral movement.</p>
+        </article>
+        <article class="card reveal" style="--d:.12s">
+          <svg viewBox="0 0 32 32"><path d="M16 16 26 8"/><circle cx="16" cy="16" r="12"/><circle cx="16" cy="16" r="7.5"/><circle cx="16" cy="16" r="3"/><path d="M21.5 20.5h.01M10 11.5h.01"/></svg>
+          <h3>Vulnerability assessment</h3>
+          <p>Recurring scans with manual triage, compared period on period so you can see drift.</p>
+        </article>
+        <article class="card reveal" style="--d:.18s">
+          <svg viewBox="0 0 32 32"><path d="M10 20a8.5 8.5 0 0 1 12 0M6.5 16.5a13.5 13.5 0 0 1 19 0M13.5 23.5a3.5 3.5 0 0 1 5 0"/><path d="M16 27h.01"/></svg>
+          <h3>Wireless networks</h3>
+          <p>Breaking into Wi-Fi, hunting rogue access points and checking segregation on site.</p>
+        </article>
+        <article class="card reveal" style="--d:.24s">
+          <svg viewBox="0 0 32 32"><rect x="4" y="17" width="24" height="9" rx="2"/><path d="M8 21.5h.01M12 21.5h.01M16 13V7M11 10l5-5 5 5M21 21.5h3"/></svg>
+          <h3>Network device review</h3>
+          <p>Firewall, switch and router configs audited for weak crypto, credentials and segmentation.</p>
+        </article>
+      </div>
+    </div>
+
+    <div class="group" style="--span:3">
+      <div class="group-title reveal"><span class="planet ringed"></span>Applications</div>
+      <div class="cards">
+        <article class="card reveal">
+          <svg viewBox="0 0 32 32"><rect x="4" y="6" width="24" height="20" rx="2"/><path d="M4 11h24M8 8.5h.01M11 8.5h.01M10 17l-2.5 2.5L10 22M22 17l2.5 2.5L22 22M18 15.5l-4 8"/></svg>
+          <h3>Web applications</h3>
+          <p>Authentication, sessions, access control, injection, business logic and attacks on your users.</p>
+        </article>
+        <article class="card reveal" style="--d:.06s">
+          <svg viewBox="0 0 32 32"><path d="M11 6c-3 0-3 2-3 4.5S8 15 5 16c3 1 3 3 3 5.5S8 26 11 26M21 6c3 0 3 2 3 4.5s0 4.5 3 5.5c-3 1-3 3-3 5.5S24 26 21 26"/><path d="M13 16h.01M16 16h.01M19 16h.01"/></svg>
+          <h3>Web services &amp; APIs</h3>
+          <p>REST, SOAP and GraphQL endpoints mapped and attacked, beyond what the docs admit to.</p>
+        </article>
+        <article class="card reveal" style="--d:.12s">
+          <svg viewBox="0 0 32 32"><rect x="9" y="3" width="14" height="26" rx="3"/><path d="M14 6.5h4M15 25h2"/><path d="M13 13.5l3 2.5-3 2.5M17.5 19h2"/></svg>
+          <h3>Mobile applications</h3>
+          <p>iOS and Android: local storage, transport security, reverse engineering and IPC.</p>
+        </article>
+      </div>
+    </div>
+
+    <div class="group" style="--span:2">
+      <div class="group-title reveal"><span class="planet"></span>Systems</div>
+      <div class="cards">
+        <article class="card reveal">
+          <svg viewBox="0 0 32 32"><rect x="5" y="6" width="22" height="15" rx="1.5"/><path d="M3 25h26M13 25l.5-4h5l.5 4"/><circle cx="16" cy="13.5" r="3"/><path d="M16 9v1.5M16 16.5V18M11.5 13.5H13M19 13.5h1.5"/></svg>
+          <h3>Build review</h3>
+          <p>Laptops, servers and gold images checked for hardening, patching and stored secrets.</p>
+        </article>
+        <article class="card reveal" style="--d:.06s">
+          <svg viewBox="0 0 32 32"><rect x="4" y="9" width="17" height="17" rx="2"/><path d="M15 17 27 5M20 5h7v7"/></svg>
+          <h3>Citrix &amp; desktop breakout</h3>
+          <p>Escaping locked-down published apps and virtual desktops to reach the network beneath.</p>
+        </article>
+      </div>
+    </div>
+
+    <div class="group" style="--span:3">
+      <div class="group-title reveal"><span class="planet"></span>Cloud</div>
+      <div class="cards">
+        <article class="card reveal">
+          <svg viewBox="0 0 32 32"><path d="M9 24a6 6 0 0 1-.6-12A8 8 0 0 1 24 13a5.5 5.5 0 0 1-.5 11z"/><path d="M13 19l3-3 3 3M16 16v6"/></svg>
+          <h3>Microsoft Azure</h3>
+          <p>Identity, RBAC and PIM, networking, Key Vault, Defender and Sentinel logging.</p>
+        </article>
+        <article class="card reveal" style="--d:.06s">
+          <svg viewBox="0 0 32 32"><path d="M9 22a6 6 0 0 1-.6-12A8 8 0 0 1 24 11a5.5 5.5 0 0 1-.5 11z"/><path d="M8 27c5 2.5 11 2.5 16 0M21.5 25.5l2.5 1.5-1 2.5"/></svg>
+          <h3>Amazon Web Services</h3>
+          <p>IAM, VPCs, S3, serverless, KMS and cross-account trust, reviewed account by account.</p>
+        </article>
+        <article class="card reveal" style="--d:.12s">
+          <svg viewBox="0 0 32 32"><rect x="5" y="5" width="9" height="9" rx="2"/><rect x="18" y="5" width="9" height="9" rx="2"/><rect x="5" y="18" width="9" height="9" rx="2"/><path d="M22.5 18v9M18 22.5h9"/></svg>
+          <h3>Google Workspace</h3>
+          <p>Sharing, DLP, Gmail routing, OAuth apps and admin controls across your tenant.</p>
+        </article>
+      </div>
+    </div>
+
+    <div class="group" style="--span:2">
+      <div class="group-title reveal"><span class="planet ringed"></span>People &amp; premises</div>
+      <div class="cards">
+        <article class="card reveal">
+          <svg viewBox="0 0 32 32"><rect x="4" y="8" width="24" height="17" rx="2"/><path d="m4 10 12 8 12-8"/><path d="M22 21v4.5a2.5 2.5 0 0 1-5 0"/></svg>
+          <h3>Phishing &amp; social engineering</h3>
+          <p>Realistic email and phone pretexts that measure how your people respond.</p>
+        </article>
+        <article class="card reveal" style="--d:.06s">
+          <svg viewBox="0 0 32 32"><path d="M8 28V5h16v23M4 28h24"/><path d="M19 17h.01"/><path d="M12 11h4"/></svg>
+          <h3>Physical access</h3>
+          <p>Getting through the front door, past the controls and onto your network on site.</p>
+        </article>
+      </div>
+    </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= mission ================= -->
+<section class="mission" id="mission">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow reveal">02 / Mission</div>
+      <h2 class="reveal" style="--d:.08s">We find the way in <span class="soft">before anyone else does.</span></h2>
+      <p class="lede reveal" style="--d:.16s">
+        Our consultants assess your environment using the same tools and techniques as real-world
+        attackers, within an agreed scope and rules of engagement. Every engagement concludes with
+        <strong>clear, prioritised guidance</strong> to remediate the risks we identify.
+      </p>
+      <ul class="pillars">
+        <li class="reveal" style="--d:.24s">Manual testing led by experienced consultants, supported by automated tooling</li>
+        <li class="reveal" style="--d:.30s">All findings verified by hand to eliminate false positives</li>
+        <li class="reveal" style="--d:.36s">Clear evidence and practical remediation guidance for every issue</li>
+      </ul>
+    </div>
+    <div class="scan-wrap reveal" style="--d:.1s" aria-hidden="true">
+      <canvas id="scan"></canvas>
+      <div class="scan-hud">
+        <span class="tl">corp.local</span>
+        <span class="br">Enumerating<span class="blink">_</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= approach ================= -->
+<section class="approach" id="approach">
+  <div class="wrap">
+    <div class="intro">
+      <div class="eyebrow reveal">03 / Approach</div>
+      <h2 class="reveal" style="--d:.08s">How an engagement runs.</h2>
+      <p class="lede reveal" style="--d:.16s">
+        Every test follows the same structured process, agreed with you in writing before any
+        testing begins.
+      </p>
+    </div>
+    <div class="flight" id="flight">
+      <span class="fill" aria-hidden="true"></span>
+      <span class="probe" aria-hidden="true"></span>
+      <ol class="stages">
+        <li class="stage reveal">
+          <div class="num">01</div>
+          <h3>Scoping</h3>
+          <p>We confirm targets, objectives, testing windows and rules of engagement, then issue a
+          scope of work and a project authorisation document for sign-off.</p>
+        </li>
+        <li class="stage reveal">
+          <div class="num">02</div>
+          <h3>Reconnaissance</h3>
+          <p>Passive and active information gathering to map the attack surface: domains, hosts,
+          exposed services, applications and user accounts.</p>
+        </li>
+        <li class="stage reveal">
+          <div class="num">03</div>
+          <h3>Enumeration and analysis</h3>
+          <p>Service and version enumeration, configuration review and vulnerability scanning,
+          with each result researched and verified manually.</p>
+        </li>
+        <li class="stage reveal">
+          <div class="num">04</div>
+          <h3>Exploitation</h3>
+          <p>Controlled exploitation to confirm real-world impact, including privilege escalation
+          and lateral movement where in scope. Critical issues are reported to you on the day
+          they are confirmed.</p>
+        </li>
+        <li class="stage reveal">
+          <div class="num">05</div>
+          <h3>Reporting</h3>
+          <p>A full technical report with an executive summary, delivered within five working days
+          of testing completing.</p>
+        </li>
+        <li class="stage reveal">
+          <div class="num">06</div>
+          <h3>Debrief and retest</h3>
+          <p>A walkthrough of the results with your technical team, and optional retesting to
+          confirm that remediation is effective.</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ================= report ================= -->
+<section class="report" id="report">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow reveal">04 / Reporting</div>
+      <h2 class="reveal" style="--d:.08s">A report you can <span class="soft">act on.</span></h2>
+      <p class="lede reveal" style="--d:.16s">
+        Every finding is written up in the same structure, so your technical team knows exactly
+        what is wrong, how serious it is and what to change.
+      </p>
+      <ul class="ticks">
+        <li class="reveal" style="--d:.22s"><svg viewBox="0 0 20 20"><path d="m4 10.5 4 4 8-9"/></svg><span>CVSS v3.1 score, with impact and likelihood rated for your environment</span></li>
+        <li class="reveal" style="--d:.28s"><svg viewBox="0 0 20 20"><path d="m4 10.5 4 4 8-9"/></svg><span>MITRE ATT&amp;CK techniques and mitigations mapped for your security team</span></li>
+        <li class="reveal" style="--d:.34s"><svg viewBox="0 0 20 20"><path d="m4 10.5 4 4 8-9"/></svg><span>Evidence captured during testing, redacted where it holds personal data</span></li>
+        <li class="reveal" style="--d:.40s"><svg viewBox="0 0 20 20"><path d="m4 10.5 4 4 8-9"/></svg><span>Specific remediation steps, not generic advice</span></li>
+      </ul>
+    </div>
+    <div class="doc reveal" style="--d:.1s">
+      <a href="report-finding.webp" target="_blank" rel="noopener" aria-label="Open an example finding from an Aphelion report">
+        <img src="report-finding.webp" width="1588" height="3128" loading="lazy" decoding="async" alt="An example report finding: customer records accessible across accounts, rated High with a CVSS score of 7.1, with MITRE ATT&amp;CK mapping, evidence and recommendations.">
+      </a>
+      <span class="tag">Example finding · fictional client</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= launch ================= -->
+<section class="launch" id="contact">
+  <div class="wrap">
+    <div class="eyebrow reveal">05 / Contact</div>
+    <h2 class="reveal" style="--d:.08s">Ready when you are.</h2>
+    <p class="lede reveal" style="--d:.16s">Tell us what you would like tested and we will come back with a scoped proposal.</p>
+    <a class="btn reveal" style="--d:.24s" href="mailto:info@aphelionltd.co.uk?subject=Penetration%20testing%20enquiry">
+      Start a conversation
+      <svg viewBox="0 0 20 20"><path d="M6 14 14 6M7 6h7v7"/></svg>
+    </a>
+    <div class="mailrow reveal" style="--d:.3s">
+      <a class="mail" href="mailto:info@aphelionltd.co.uk">info@aphelionltd.co.uk</a>
+      <button class="copy" type="button" data-copy="info@aphelionltd.co.uk" data-tip="Copy email" aria-label="Copy email address">
+        <svg class="ic" viewBox="0 0 16 16"><rect x="5.5" y="5.5" width="8" height="8" rx="1.6"/><path d="M10.5 5.5V3.6c0-.9-.7-1.6-1.6-1.6H3.6C2.7 2 2 2.7 2 3.6v5.3c0 .9.7 1.6 1.6 1.6h1.9"/></svg>
+        <svg class="ok" viewBox="0 0 16 16"><path d="m3 8.5 3.2 3.2L13 4.8"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="world" aria-hidden="true">
+    <div class="body"></div>
+    <div class="ring"><div class="mx"><div class="my"><span class="moon"></span></div></div></div>
+  </div>
+</section>
+
 <footer>&copy; <span id="yr">2026</span> Aphelion Ltd</footer>
+<p id="live" class="sr" aria-live="polite" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)"></p>
 
 <script>
 (function () {
@@ -165,31 +1051,80 @@
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var TAU = Math.PI * 2;
   var FONT = 'Outfit, "Segoe UI", system-ui, sans-serif';
+  var MONO = '"JetBrains Mono", ui-monospace, Menlo, monospace';
   var PERIOD = 28000;           // ms for one full orbit
   var M0 = Math.PI - 0.6;       // start just short of aphelion so the label shows early
   var dpr = 1;
+  var scrollY = window.scrollY || 0;
 
   function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
+  function mod(a, n) { return ((a % n) + n) % n; }
 
-  /* ================= stars: full-screen background ================= */
+  /* ================= copy email ================= */
+  var live = document.getElementById('live');
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text);
+    return new Promise(function (ok, fail) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;top:-1000px;opacity:0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy') ? ok() : fail(); } catch (e) { fail(e); }
+      document.body.removeChild(ta);
+    });
+  }
+  document.querySelectorAll('.copy').forEach(function (btn) {
+    var timer;
+    btn.addEventListener('click', function () {
+      copyText(btn.getAttribute('data-copy')).then(function () {
+        btn.classList.add('done');
+        btn.setAttribute('data-tip', 'Copied');
+        live.textContent = 'Email address copied';
+      }, function () {
+        btn.setAttribute('data-tip', 'Press Ctrl+C to copy');
+      });
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        btn.classList.remove('done');
+        btn.setAttribute('data-tip', 'Copy email');
+        live.textContent = '';
+      }, 1800);
+    });
+  });
+
+  /* ================= stars: full-screen background =================
+     Stars are grouped by depth layer and brightness, and each group is drawn
+     as a single path with one fill, instead of one fill per star. Only a small
+     share of stars twinkle and are drawn one by one. All motion is time based,
+     so it runs at the display's refresh rate without speeding up on 120 Hz
+     screens. */
   var sky = document.getElementById('stars');
   var sctx = sky.getContext('2d');
-  var w = 0, h = 0, stars = [], shooters = [];
+  var w = 0, h = 0, layers = [], twinklers = [], shooters = [];
+  var LAYERS = [
+    { vy: 1.2, par: 0.07 },   // far: slow drift, little parallax
+    { vy: 2.4, par: 0.15 },
+    { vy: 3.6, par: 0.24 }    // near
+  ];
+  var BUCKETS = 3;            // brightness steps per layer
 
   function makeStars() {
     var count = Math.round((w * h) / 4500);
-    stars = [];
+    layers = LAYERS.map(function (L) {
+      var groups = [];
+      for (var b = 0; b < BUCKETS; b++) groups.push([]);
+      return { L: L, groups: groups };
+    });
+    twinklers = [];
     for (var i = 0; i < count; i++) {
       var depth = Math.random();
-      stars.push({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        z: depth,
-        r: 0.3 + depth * 1.3,
-        speed: 0.01 + depth * 0.05,
-        phase: Math.random() * Math.PI * 2,
-        tw: 0.6 + Math.random() * 1.8
-      });
+      var li = depth < 0.34 ? 0 : depth < 0.68 ? 1 : 2;
+      var s = { x: Math.random() * w, y: Math.random() * h, z: depth, li: li,
+                r: 0.3 + depth * 1.3, phase: Math.random() * TAU, tw: 0.6 + Math.random() * 1.8 };
+      if (!reduce && Math.random() < 0.15) twinklers.push(s);
+      else layers[li].groups[Math.floor(Math.random() * BUCKETS)].push(s);
     }
   }
 
@@ -197,51 +1132,70 @@
     shooters.push({
       x: Math.random() * w * 0.8 + w * 0.1,
       y: Math.random() * h * 0.4,
-      vx: 6 + Math.random() * 4,
-      vy: 2.5 + Math.random() * 2,
-      life: 0
+      vx: 360 + Math.random() * 240,       // px per second
+      vy: 150 + Math.random() * 120,
+      age: 0
     });
   }
 
-  function drawStars(t) {
+  function layerOffset(L, t) {
+    return { x: mod(t * 0.001 * L.vy * 0.4, w), y: mod(t * 0.001 * L.vy - scrollY * L.par, h) };
+  }
+
+  function drawStars(t, dt) {
     var c = sctx;
     c.clearRect(0, 0, w, h);
-    for (var i = 0; i < stars.length; i++) {
-      var s = stars[i];
-      if (!reduce) {
-        s.y += s.speed;
-        s.x += s.speed * 0.4;
-        if (s.y > h + 2) { s.y = -2; s.x = Math.random() * w; }
-        if (s.x > w + 2) { s.x = -2; }
+    c.fillStyle = '#fff';
+    var offs = [];
+    for (var i = 0; i < layers.length; i++) {
+      var o = reduce ? { x: 0, y: mod(-scrollY * layers[i].L.par, h) } : layerOffset(layers[i].L, t);
+      offs.push(o);
+      for (var g = 0; g < BUCKETS; g++) {
+        var list = layers[i].groups[g];
+        if (!list.length) continue;
+        c.globalAlpha = 0.25 + 0.17 * g + 0.15 * i;
+        c.beginPath();
+        for (var k = 0; k < list.length; k++) {
+          var st = list[k], x = st.x + o.x, y = st.y + o.y;
+          if (x > w) x -= w;
+          if (y > h) y -= h;
+          c.moveTo(x + st.r, y);
+          c.arc(x, y, st.r, 0, TAU);
+        }
+        c.fill();
       }
+    }
+
+    c.fillStyle = '#fff';
+    for (var j = 0; j < twinklers.length; j++) {
+      var s = twinklers[j], off = offs[s.li];
       var a = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(t * 0.001 * s.tw + s.phase));
-      if (reduce) a = 0.7;
       c.globalAlpha = a * (0.4 + s.z * 0.6);
-      c.fillStyle = '#fff';
       c.beginPath();
-      c.arc(s.x, s.y, s.r, 0, TAU);
+      c.arc(mod(s.x + off.x, w), mod(s.y + off.y, h), s.r, 0, TAU);
       c.fill();
     }
     c.globalAlpha = 1;
 
     if (reduce) return;
-    if (Math.random() < 0.004 && shooters.length < 2) spawnShooter();
-    for (var j = shooters.length - 1; j >= 0; j--) {
-      var m = shooters[j];
-      m.x += m.vx;
-      m.y += m.vy;
-      m.life++;
-      var alpha = Math.max(0, 1 - m.life / 60);
-      var g = c.createLinearGradient(m.x, m.y, m.x - m.vx * 9, m.y - m.vy * 9);
+    if (Math.random() < 0.24 * dt && shooters.length < 2) spawnShooter();
+    for (var k = shooters.length - 1; k >= 0; k--) {
+      var m = shooters[k];
+      m.age += dt;
+      m.x += m.vx * dt;
+      m.y += m.vy * dt;
+      var alpha = Math.max(0, 1 - m.age);
+      var tx = m.x - m.vx * 0.15, ty = m.y - m.vy * 0.15;
+      var g = c.createLinearGradient(m.x, m.y, tx, ty);
       g.addColorStop(0, 'rgba(255,255,255,' + alpha + ')');
       g.addColorStop(1, 'rgba(255,255,255,0)');
       c.strokeStyle = g;
       c.lineWidth = 1.5;
       c.beginPath();
       c.moveTo(m.x, m.y);
-      c.lineTo(m.x - m.vx * 9, m.y - m.vy * 9);
+      c.lineTo(tx, ty);
       c.stroke();
-      if (m.life > 60) shooters.splice(j, 1);
+      if (m.age > 1) shooters.splice(k, 1);
     }
   }
 
@@ -401,29 +1355,295 @@
     if (near > 0) drawLabel(near);
   }
 
+  /* ================= scan: wireframe planet being enumerated ================= */
+  var sc = document.getElementById('scan');
+  var scx = sc.getContext('2d');
+  var sw = 0, scanOn = false, scanBg = null;
+  var TILT = 0.38;
+  var targets = [
+    { lat: 0.55,  lon: 0.3, tag: 'Kerberos',   label: 'SPN svc_sql roastable' },
+    { lat: -0.2,  lon: 0.8, tag: 'AD CS',      label: 'ESC8 via /certsrv' },
+    { lat: 0.15,  lon: 1.4, tag: 'SMB',        label: 'signing not required' },
+    { lat: -0.6,  lon: 1.9, tag: 'Kerberos',   label: 'AS-REP: no preauth' },
+    { lat: 0.35,  lon: 2.5, tag: 'Delegation', label: 'unconstrained: APP01' },
+    { lat: -0.05, lon: 3.0, tag: 'LLMNR',      label: 'NTLMv2 hash captured' },
+    { lat: 0.75,  lon: 3.5, tag: 'SYSVOL',     label: 'GPP cpassword found' },
+    { lat: -0.4,  lon: 4.0, tag: 'ACL',        label: 'DCSync: Helpdesk' },
+    { lat: 0.2,   lon: 4.5, tag: 'NTLM',       label: 'NTLMv1 on DC01' },
+    { lat: -0.25, lon: 5.0, tag: 'API',        label: 'BOLA /users/{id}' },
+    { lat: 0.5,   lon: 5.5, tag: 'Web',        label: 'SQLi in search ?q=' },
+    { lat: -0.7,  lon: 6.0, tag: 'Citrix',     label: 'CVE-2023-4966' }
+  ];
+  targets.forEach(function (g) { g.hit = -1e9; });
+
+  function layoutScan() {
+    var r = sc.getBoundingClientRect();
+    sw = r.width;
+    sc.width = Math.round(sw * dpr);
+    sc.height = Math.round(sw * dpr);
+    scx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (!sw) return;
+    // the atmosphere and the shaded body never change, so draw them once
+    scanBg = document.createElement('canvas');
+    scanBg.width = sc.width; scanBg.height = sc.height;
+    var c = scanBg.getContext('2d'), cx = sw / 2, cy = sw / 2, R = sw * 0.27;
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var atm = c.createRadialGradient(cx, cy, R * 0.9, cx, cy, R * 1.35);
+    atm.addColorStop(0, 'rgba(255,255,255,0.12)');
+    atm.addColorStop(1, 'rgba(255,255,255,0)');
+    c.fillStyle = atm; c.beginPath(); c.arc(cx, cy, R * 1.35, 0, TAU); c.fill();
+    var body = c.createRadialGradient(cx - R * 0.4, cy - R * 0.45, R * 0.1, cx, cy, R);
+    body.addColorStop(0, '#1b1b24');
+    body.addColorStop(1, '#060609');
+    c.fillStyle = body; c.beginPath(); c.arc(cx, cy, R, 0, TAU); c.fill();
+  }
+
+  var P = { x: 0, y: 0, z: 0 };
+  function project(lat, lon, rot, R, cx, cy, out) {
+    var cl = Math.cos(lat);
+    var x = cl * Math.sin(lon + rot), y = Math.sin(lat), z = cl * Math.cos(lon + rot);
+    out.x = cx + x * R;
+    out.y = cy - (y * Math.cos(TILT) - z * Math.sin(TILT)) * R;
+    out.z = y * Math.sin(TILT) + z * Math.cos(TILT);
+    return out;
+  }
+
+  // one path for the far side of the graticule and one for the near side
+  function graticule(c, rot, R, cx, cy, front) {
+    c.beginPath();
+    var i, k, open;
+    for (i = -2; i <= 2; i++) {
+      open = false;
+      for (k = 0; k <= 72; k++) {
+        project(i * 0.5, k / 72 * TAU, rot, R, cx, cy, P);
+        if ((P.z >= 0) === front) { if (open) c.lineTo(P.x, P.y); else { c.moveTo(P.x, P.y); open = true; } }
+        else open = false;
+      }
+    }
+    for (i = 0; i < 12; i++) {
+      open = false;
+      for (k = 0; k <= 48; k++) {
+        project(-Math.PI / 2 + k / 48 * Math.PI, i / 12 * TAU, rot, R, cx, cy, P);
+        if ((P.z >= 0) === front) { if (open) c.lineTo(P.x, P.y); else { c.moveTo(P.x, P.y); open = true; } }
+        else open = false;
+      }
+    }
+    c.stroke();
+  }
+
+  function drawScan(t) {
+    if (!sw || !scanBg) return;
+    var c = scx, cx = sw / 2, cy = sw / 2, R = sw * 0.27;
+    var rot = reduce ? 0.6 : t * 0.00012;
+    c.clearRect(0, 0, sw, sw);
+
+    // satellite orbit, far half
+    var oa = reduce ? 1.2 : t * 0.00045, orx = R * 1.55, ory = R * 0.42, ot = -0.32;
+    var sx = Math.cos(oa) * orx, sy = Math.sin(oa) * ory;
+    var sat = { x: cx + sx * Math.cos(ot) - sy * Math.sin(ot), y: cy + sx * Math.sin(ot) + sy * Math.cos(ot), front: Math.sin(oa) > 0 };
+    c.save();
+    c.translate(cx, cy); c.rotate(ot);
+    c.lineWidth = 1;
+    c.strokeStyle = 'rgba(255,255,255,0.12)';
+    c.beginPath(); c.ellipse(0, 0, orx, ory, 0, Math.PI, TAU); c.stroke();
+    c.restore();
+    function drawSat() {
+      c.fillStyle = 'rgba(255,255,255,0.14)';
+      c.beginPath(); c.arc(sat.x, sat.y, 7, 0, TAU); c.fill();
+      c.fillStyle = '#fff';
+      c.beginPath(); c.arc(sat.x, sat.y, 2.2, 0, TAU); c.fill();
+    }
+    if (!sat.front) drawSat();
+
+    c.drawImage(scanBg, 0, 0, sw, sw);
+
+    c.lineWidth = 1;
+    c.strokeStyle = 'rgba(255,255,255,0.05)';
+    graticule(c, rot, R, cx, cy, false);
+    c.strokeStyle = 'rgba(255,255,255,0.2)';
+    graticule(c, rot, R, cx, cy, true);
+    c.strokeStyle = 'rgba(255,255,255,0.5)';
+    c.beginPath(); c.arc(cx, cy, R, 0, TAU); c.stroke();
+
+    // scan beam sweeping left to right across the disc
+    var SP = 5200, ph = reduce ? 0.62 : (t % SP) / SP;
+    var bx = cx - R * 1.2 + ph * R * 2.4;
+    var half = Math.sqrt(Math.max(0, R * R - (bx - cx) * (bx - cx)));
+    if (half > 0) {
+      var bg = c.createLinearGradient(bx - R * 0.5, 0, bx, 0);
+      bg.addColorStop(0, 'rgba(255,255,255,0)');
+      bg.addColorStop(1, 'rgba(255,255,255,0.12)');
+      c.save();
+      c.beginPath(); c.arc(cx, cy, R, 0, TAU); c.clip();
+      c.fillStyle = bg; c.fillRect(bx - R * 0.5, cy - R, R * 0.5, R * 2);
+      c.restore();
+      c.strokeStyle = 'rgba(255,255,255,0.75)';
+      c.beginPath(); c.moveTo(bx, cy - half - 8); c.lineTo(bx, cy + half + 8); c.stroke();
+    }
+
+    // targets: pinged when the beam crosses them on the near side
+    var fs = clamp(Math.round(sw * 0.022), 9, 12);
+    var big = '500 ' + fs + 'px ' + MONO, small = '400 ' + Math.max(8, fs - 2) + 'px ' + MONO;
+    c.textBaseline = 'middle';
+    for (var idx = 0; idx < targets.length; idx++) {
+      var g = targets[idx];
+      var p = project(g.lat, g.lon, rot, R, cx, cy, {});
+      if (p.z <= 0.05) continue;
+      if (reduce) { if (idx % 3 === 0) g.hit = t - 600; }
+      else if (Math.abs(p.x - bx) < 4 && t - g.hit > 2000) g.hit = t;
+      var age = (t - g.hit) / 1000;
+      var vis = clamp(p.z * 2, 0, 1);
+
+      c.fillStyle = 'rgba(255,255,255,' + (0.5 * vis) + ')';
+      c.beginPath(); c.arc(p.x, p.y, 1.6, 0, TAU); c.fill();
+      if (age >= 3.4) continue;
+
+      var life = age < 2.6 ? 1 : 1 - (age - 2.6) / 0.8;
+      var a = life * vis;
+      if (age < 1.2 && !reduce) {
+        c.strokeStyle = 'rgba(255,255,255,' + (1 - age / 1.2) * vis + ')';
+        c.beginPath(); c.arc(p.x, p.y, 3 + age * 18, 0, TAU); c.stroke();
+      }
+      // target brackets
+      var b = 7, q = 3;
+      c.strokeStyle = 'rgba(255,255,255,' + a + ')';
+      c.beginPath();
+      c.moveTo(p.x - b, p.y - b + q); c.lineTo(p.x - b, p.y - b); c.lineTo(p.x - b + q, p.y - b);
+      c.moveTo(p.x + b - q, p.y - b); c.lineTo(p.x + b, p.y - b); c.lineTo(p.x + b, p.y - b + q);
+      c.moveTo(p.x - b, p.y + b - q); c.lineTo(p.x - b, p.y + b); c.lineTo(p.x - b + q, p.y + b);
+      c.moveTo(p.x + b - q, p.y + b); c.lineTo(p.x + b, p.y + b); c.lineTo(p.x + b, p.y + b - q);
+      c.stroke();
+      c.fillStyle = 'rgba(255,255,255,' + a + ')';
+      c.beginPath(); c.arc(p.x, p.y, 2.4, 0, TAU); c.fill();
+
+      // leader line and a two-line label, pushed outward from the centre of the globe
+      var dir = p.x >= cx ? 1 : -1;
+      var lx = p.x + dir * 16, ly = p.y - 16;
+      c.font = big;
+      var tw = c.measureText(g.label).width;
+      var ex = dir > 0 ? Math.max(lx + 12, cx + R + 10) : Math.min(lx - 12, cx - R - 10);
+      if (dir > 0 && ex + 6 + tw > sw - 4) ex = sw - 10 - tw;
+      if (dir < 0 && ex - 6 - tw < 4) ex = 10 + tw;
+      c.strokeStyle = 'rgba(255,255,255,' + 0.45 * a + ')';
+      c.beginPath(); c.moveTo(p.x + dir * 8, p.y - 8); c.lineTo(lx, ly); c.lineTo(ex, ly); c.stroke();
+      var chars = reduce ? g.label.length : Math.min(g.label.length, Math.floor(age * 30));
+      c.textAlign = dir > 0 ? 'left' : 'right';
+      c.fillStyle = 'rgba(244,244,245,' + a + ')';
+      c.fillText(g.label.slice(0, chars), ex + dir * 6, ly + fs * 0.75);
+      c.font = small;
+      c.fillStyle = 'rgba(154,154,162,' + a + ')';
+      c.fillText(g.tag.toUpperCase(), ex + dir * 6, ly - fs * 0.75);
+    }
+
+    c.save();
+    c.translate(cx, cy); c.rotate(ot);
+    c.strokeStyle = 'rgba(255,255,255,0.22)';
+    c.beginPath(); c.ellipse(0, 0, orx, ory, 0, 0, Math.PI); c.stroke();
+    c.restore();
+    if (sat.front) drawSat();
+  }
+
+  /* ================= scroll-driven bits ================= */
+  var flight = document.getElementById('flight');
+  var fill = flight.querySelector('.fill');
+  var probe = flight.querySelector('.probe');
+  var stages = flight.querySelectorAll('.stage');
+  var stageTops = [], flightH = 0, scrollQueued = false;
+
+  function layoutFlight() {
+    flightH = flight.offsetHeight;
+    stageTops = Array.prototype.map.call(stages, function (s) { return s.offsetTop; });
+  }
+
+  function updateFlight() {
+    scrollQueued = false;
+    var r = flight.getBoundingClientRect();
+    // the probe sits level with 55% of the viewport height as you scroll past
+    var p = clamp((window.innerHeight * 0.55 - r.top) / flightH, 0, 1);
+    var travel = (flightH - 16) * p;
+    fill.style.transform = 'scaleY(' + p.toFixed(4) + ')';
+    probe.style.transform = 'translate3d(0,' + travel.toFixed(1) + 'px,0)';
+    for (var i = 0; i < stages.length; i++) {
+      stages[i].classList.toggle('lit', stageTops[i] + 13 <= travel + 9);
+    }
+    if (reduce && layers.length) drawStars(0, 0);
+  }
+
+  function onScroll() {
+    scrollY = window.scrollY || window.pageYOffset || 0;
+    if (!scrollQueued) { scrollQueued = true; requestAnimationFrame(updateFlight); }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  // card spotlight follows the pointer
+  document.querySelectorAll('.card').forEach(function (el) {
+    el.addEventListener('pointermove', function (e) {
+      var r = el.getBoundingClientRect();
+      el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      el.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    });
+  });
+
+  /* ================= reveal on scroll, and pausing offscreen canvases ================= */
+  var orbitOn = true;
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+    document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+
+    new IntersectionObserver(function (entries) {
+      scanOn = entries[0].isIntersecting;
+      if (reduce && scanOn) drawScan(0);
+    }).observe(sc);
+    new IntersectionObserver(function (entries) {
+      orbitOn = entries[0].isIntersecting;
+    }).observe(document.getElementById('orbit'));
+  } else {
+    document.querySelectorAll('.reveal').forEach(function (el) { el.classList.add('in'); });
+    scanOn = true;
+  }
+
   /* ================= main loop ================= */
   function resize() {
     dpr = Math.min(window.devicePixelRatio || 1, 2);
     w = window.innerWidth;
     h = window.innerHeight;
-    sky.width = w * dpr;
-    sky.height = h * dpr;
-    sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    if (w >= 40 && h >= 40) makeStars(); else stars = [];
+    // the sky is soft points of light, so it does not need the full device resolution
+    var sdpr = Math.min(dpr, 1.5);
+    sky.width = Math.round(w * sdpr);
+    sky.height = Math.round(h * sdpr);
+    sctx.setTransform(sdpr, 0, 0, sdpr, 0, 0);
+    if (w >= 40 && h >= 40) makeStars(); else layers = [];
     layoutOrbit();
+    layoutScan();
+    layoutFlight();
+    onScroll();
   }
 
+  var last = 0;
   function draw(t) {
     t = t || 0;
-    if (stars.length) drawStars(t);
-    if (orbit) drawOrbit(t);
+    var dt = last ? Math.min((t - last) / 1000, 0.1) : 0;   // seconds, capped after a stall
+    last = t;
+    if (layers.length) drawStars(t, dt);
+    if (orbit && orbitOn) drawOrbit(t);
+    if (scanOn) drawScan(t);
     if (!reduce) requestAnimationFrame(draw);
   }
 
-  window.addEventListener('resize', function () { resize(); if (reduce) draw(0); });
+  var resizeTimer;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () { resize(); if (reduce) draw(0); }, 120);
+  });
   resize();
   requestAnimationFrame(draw);
-  if (reduce && document.fonts && document.fonts.ready) document.fonts.ready.then(function () { draw(0); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { layoutFlight(); if (reduce) draw(0); });
 })();
 </script>
 </body>
